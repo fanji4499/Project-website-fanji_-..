@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fanji Sihabudin Pranata | Personal Portfolio</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           RESET & CSS VARIABLES
+           ========================================= */
+        :root {
+            --bg-color: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #38bdf8; /* Biru Cerah */
+            --accent-glow: rgba(56, 189, 248, 0.4);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --transition-speed: 0.6s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Custom Scrollbar & Progress Bar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 4px; }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent-color);
+            width: 0%;
+            z-index: 2000;
+            box-shadow: 0 0 10px var(--accent-color);
+            transition: width 0.1s ease-out;
+        }
+
+        /* =========================================
+           BACKGROUND ANIMATION (CANVAS)
+           ========================================= */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            transform: translateY(0);
+            will-change: transform;
+        }
+
+        /* =========================================
+           NAVIGATION
+           ========================================= */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        nav.scrolled {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .logo span { color: var(--accent-color); }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: var(--accent-color); }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px var(--accent-color);
+        }
+
+        .nav-links a:hover::after { width: 100%; }
+
+        .hamburger { display: none; cursor: pointer; font-size: 1.5rem; color: var(--text-primary); z-index: 1001; }
+
+        /* =========================================
+           HERO SECTION
+           ========================================= */
+        #hero {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 100px 20px 50px;
+        }
+
+        .hero-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            gap: 30px;
+        }
+
+        .hero-image-wrapper {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, var(--accent-color), transparent);
+            box-shadow: 0 0 40px var(--accent-glow);
+            animation: profileFloat 6s ease-in-out infinite;
+            opacity: 0;
+            animation: revealProfile 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, profileFloat 6s ease-in-out infinite 1s;
+        }
+
+        .hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--bg-color);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 600;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .text-static { 
+            color: var(--text-secondary); 
+            font-weight: 300; 
+            letter-spacing: 2px; 
+            opacity: 0; 
+            animation: fadeUp 1s forwards 0.5s; 
+        }
+
+        .text-animated {
+            font-size: 4rem; 
+            font-weight: 800;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: textSlideBlue 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.8s;
+            text-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
+        }
+
+        .hero-desc {
+            font-size: 1.2rem; 
+            color: var(--text-secondary); 
+            max-width: 600px; 
+            margin: 0 auto 30px;
+            opacity: 0; 
+            animation: fadeUp 1s forwards 1.2s;
+        }
+
+        .btn-cta {
+            padding: 14px 35px;
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+            opacity: 0;
+            animation: fadeUp 1s forwards 1.5s;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-cta:hover {
+            background: var(--accent-color); 
+            color: var(--bg-color);
+            box-shadow: 0 0 25px var(--accent-color); 
+            transform: translateY(-4px);
+        }
+
+        .scroll-down {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            animation: bounce 2.5s infinite; opacity: 0.6; color: var(--text-secondary);
+            font-size: 0.9rem; display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+
+        /* =========================================
+           ABOUT SECTION
+           ========================================= */
+        #about {
+            padding: 100px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .about-content {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 50px;
+            border-radius: 24px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .about-content.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+
+        .about-text strong { color: var(--accent-color); }
+
+        /* =========================================
+           SECTIONS GENERAL
+           ========================================= */
+        section { padding: 100px 20px; max-width: 1200px; margin: 0 auto; }
+
+        .section-header {
+            text-align: center; margin-bottom: 70px;
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .section-header.visible { opacity: 1; transform: translateY(0); }
+
+        .section-title {
+            font-size: 2.8rem; margin-bottom: 15px; position: relative; display: inline-block;
+        }
+
+        .section-title::after {
+            content: ''; position: absolute; width: 60px; height: 4px;
+            background: var(--accent-color); bottom: -10px; left: 50%;
+            transform: translateX(-50%); border-radius: 2px;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .section-subtitle { color: var(--text-secondary); font-size: 1.1rem; }
+
+        /* =========================================
+           PROJECTS SECTION
+           ========================================= */
+        .projects-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 0; 
+            transform: translateY(60px);
+        }
+
+        .project-card.visible { opacity: 1; transform: translateY(0); }
+
+        .project-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.5s ease;
+        }
+
+        .project-card:hover .project-image {
+            transform: scale(1.05);
+        }
+
+        .project-info { padding: 30px; }
+
+        .project-info h3 { font-size: 1.5rem; margin-bottom: 10px; color: var(--text-primary); }
+        .project-info p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 20px; }
+        
+        .project-link {
+            color: var(--accent-color); text-decoration: none; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 8px; transition: gap 0.3s;
+        }
+
+        .project-link:hover { gap: 15px; text-shadow: 0 0 10px var(--accent-glow); }
+
+        /* =========================================
+           CERTIFICATES SECTION
+           ========================================= */
+        .cert-container-single {
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; transform: scale(0.9); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .cert-container-single.visible { opacity: 1; transform: scale(1); }
+
+        .cert-item-single {
+            position: relative; max-width: 850px; width: 100%; border-radius: 20px;
+            overflow: hidden; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(56, 189, 248, 0.2); cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .cert-item-single:hover { 
+            transform: scale(1.02); 
+            border-color: var(--accent-color); 
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+        }
+
+        .cert-item-single img { width: 100%; height: auto; display: block; }
+
+        .cert-overlay-single {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(15,23,42,0.4), rgba(15,23,42,0.9)); display: flex; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+
+        .cert-item-single:hover .cert-overlay-single { opacity: 1; }
+
+        .cert-text-single {
+            color: white; font-size: 1.3rem; border: 2px solid var(--accent-color);
+            padding: 12px 30px; border-radius: 40px; background: rgba(56, 189, 248, 0.2);
+            backdrop-filter: blur(10px);
+            letter-spacing: 1px;
+        }
+
+        /* =========================================
+           CONTACT & FOOTER
+           ========================================= */
+        #contact { text-align: center; }
+
+        .social-links {
+            display: flex; justify-content: center; gap: 25px; margin-top: 50px; flex-wrap: wrap;
+        }
+
+        .social-btn {
+            width: 60px; height: 60px; border-radius: 50%; background: var(--bg-secondary);
+            display: flex; justify-content: center; align-items: center; color: var(--text-primary);
+            font-size: 1.4rem; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--accent-color);
+            opacity: 0;
+            z-index: 0;
+            transition: opacity 0.4s;
+            border-radius: 50%;
+        }
+
+        .social-btn i { position: relative; z-index: 1; }
+
+        .social-btn:hover::before { opacity: 1; }
+        .social-btn:hover { color: var(--bg-color); transform: translateY(-8px) rotate(5deg); box-shadow: 0 10px 20px var(--accent-glow); border-color: transparent; }
+
+        footer {
+            text-align: center; padding: 40px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 80px; color: var(--text-secondary); font-size: 0.9rem;
+            position: relative;
+        }
+
+        /* =========================================
+           MODAL
+           ========================================= */
+        .modal {
+            display: none; position: fixed; z-index: 2000; padding-top: 60px; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px); opacity: 0; transition: opacity 0.3s;
+        }
+        .modal.show { opacity: 1; }
+        .modal-content {
+            margin: auto; display: block; width: 85%; max-width: 950px; border-radius: 10px;
+            box-shadow: 0 0 50px rgba(56, 189, 248, 0.3); animation: zoomIn 0.4s;
+        }
+        .close-modal {
+            position: absolute; top: 25px; right: 40px; color: #fff; font-size: 45px;
+            font-weight: bold; transition: 0.3s; cursor: pointer; z-index: 2001;
+        }
+        .close-modal:hover { color: var(--accent-color); transform: scale(1.1); }
+
+        /* =========================================
+           KEYFRAMES
+           ========================================= */
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes profileFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes revealProfile { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes textSlideBlue { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-15px) translateX(-50%); }
+            60% { transform: translateY(-8px) translateX(-50%); }
+        }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; } .text-animated { font-size: 2.8rem; }
+            .hero-image-wrapper { width: 160px; height: 160px; }
+            .nav-links {
+                position: fixed; right: -100%; top: 0; height: 100vh; background: rgba(15, 23, 42, 0.98);
+                flex-direction: column; justify-content: center; align-items: center; width: 70%;
+                transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1); z-index: 999; box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            }
+            .nav-links.active { right: 0; } .hamburger { display: block; z-index: 1000; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Progress Bar -->
+    <div id="progress-bar"></div>
+
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <nav id="navbar">
+        <a href="#hero" class="logo">FANJI<span>.DEV</span></a>
+        <ul class="nav-links">
+            <li><a href="#hero" class="active">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#certificates">Certificates</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <div class="hero-container">
+            <!-- Foto Jojo (Diganti) -->
+            <div class="hero-image-wrapper">
+                <img src="https://z-cdn-media.chatglm.cn/files/b478900c-650f-4bff-a734-399438eac52e.png?auth_key=1868920147-87927d6d307042e0a33fa9ee039626ca-0-bc3f685dd8783a53064a8598b37cded8" alt="Jojo Profile" class="hero-img">
+            </div>
+            
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="text-static">I'M</span>
+                    <span class="text-animated">Fanji</span>
+                </h1>
+                <p class="hero-desc">Sihabudin Pranata | Web Developer & Tech Enthusiast</p>
+                <a href="#projects" class="btn-cta">Lihat Karya</a>
+            </div>
+        </div>
+        <div class="scroll-down">
+            <span>Scroll Down</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="section-header">
+            <h2 class="section-title">About Me</h2>
+            <p class="section-subtitle">Mengenal saya lebih dekat</p>
+        </div>
+        <div class="about-content reveal-on-scroll">
+            <p class="about-text">
+                Halo! Saya <strong>Fanji Sihabudin Pranata</strong>, seorang pengembang web yang berdedikasi dengan semangat tinggi dalam menciptakan solusi digital yang inovatif. Fokus utama saya adalah menggabungkan desain antarmuka yang elegan dengan kode yang bersih dan efisien.
+            </p>
+            <p class="about-text">
+                Saya memiliki ketertarikan mendalam pada teknologi web modern, otomatisasi, dan pengembangan antarmuka pengguna (UI/UX). Melalui setiap proyek yang saya kerjakan, saya berkomitmen untuk memberikan hasil terbaik yang tidak hanya berfungsi dengan baik, tetapi juga memberikan pengalaman visual yang memuaskan.
+            </p>
+            <p class="about-text">
+                Terus belajar dan berkembang di dunia teknologi adalah prioritas saya, karena saya percaya bahwa inovasi adalah kunci kesuksesan di era digital ini.
+            </p>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects">
+        <div class="section-header">
+            <h2 class="section-title">Projects</h2>
+            <p class="section-subtitle">Portofolio proyek terbaru saya</p>
+        </div>
+
+        <div class="projects-grid">
+            <!-- Project 1: Workflow Automation -->
+            <div class="project-card reveal-on-scroll">
+                <img src="https://z-cdn-media.chatglm.cn/files/e5fe8585-2204-46e4-ab34-8344cb1331bb.png?auth_key=1868918807-94e9cb61bb5f4c978c5ccf5a6426ee85-0-ab13ba499898afeb4a5cd3b5e56f76bd" alt="Automated Workflow" class="project-image">
+                <div class="project-info">
+                    <h3>Automated Workflow</h3>
+                    <p>Sistem alur kerja otomatis untuk manajemen file dan analisis data, terintegrasi dengan berbagai layanan API.</p>
+                    <a href="#" class="project-link">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Project 2: AgriAI (Diganti Foto Tami.png) -->
+            <div class="project-card reveal-on-scroll" style="transition-delay: 0.15s;">
+                <img src="https://z-cdn-media.chatglm.cn/files/8b6ed14a-22d4-4a8b-ad5d-ea504a73a6e9.png?auth_key=1868920147-ab77e264036d4d93a00a9a1343c99527-0-a2a4cebbc355ad5568c8ff14587b9737" alt="AgriAI Assistant" class="project-image">
+                <div class="project-info">
+                    <h3>AgriAI Assistant</h3>
+                    <p>Aplikasi asisten cerdas berbasis AI untuk pertanian, membantu petani mendiagnosa penyakit tanaman melalui obrolan interaktif.</p>
+                    <a href="#" class="project-link">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <!-- Project 3: Personal Web Dev -->
+            <div class="project-card reveal-on-scroll" style="transition-delay: 0.3s;">
+                <img src="https://z-cdn-media.chatglm.cn/files/fcbbc44c-b3e2-45a4-911f-de7b7e47c538.png?auth_key=1868918807-3066aa45063348c3ac460124baf20937-0-cf278fd2e00d9dda379a7a55ffda96e0" alt="Website Development" class="project-image">
+                <div class="project-info">
+                    <h3>Personal Web Development</h3>
+                    <p>Pengembangan website personal menggunakan HTML, CSS, dan JavaScript modern dengan desain responsif.</p>
+                    <a href="#" class="project-link">Lihat Detail <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certificates Section -->
+    <section id="certificates">
+        <div class="section-header">
+            <h2 class="section-title">Certificates</h2>
+            <p class="section-subtitle">Sertifikasi dan penghargaan</p>
+        </div>
+
+        <div class="cert-container-single reveal-on-scroll">
+            <div class="cert-item-single" id="mainCert">
+                <img src="https://z-cdn-media.chatglm.cn/files/681484dd-d41c-457d-8112-b3c1acfae606.png?auth_key=1868918322-efdd5d1ce48b483eadd5393705973181-0-bf63c361eaea66d6ea1a47bfa65b5c28" alt="Certificate Indigo AI Connect">
+                <div class="cert-overlay-single">
+                    <div class="cert-text-single"><i class="fas fa-search-plus"></i> Lihat Fullscreen</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="section-header">
+            <h2 class="section-title">Get In Touch</h2>
+            <p class="section-subtitle">Terhubung melalui media sosial</p>
+        </div>
+        
+        <a href="mailto:email@example.com" class="btn-cta" style="margin-bottom: 40px;">Kirim Email</a>
+
+        <div class="social-links reveal-on-scroll">
+            <a href="https://www.instagram.com/fantzgerald?igsh=MXhjMDM2YjRqN2dwag==" target="_blank" class="social-btn">
+                <i class="fab fa-instagram"></i>
+            </a>
+            
+            <a href="https://www.tiktok.com/@fanji494?_r=1&_t=ZS-93EOKQ30K7Y" target="_blank" class="social-btn">
+                <i class="fab fa-tiktok"></i>
+            </a>
+
+            <a href="https://github.com/fanjisihabudin45-hue" target="_blank" class="social-btn">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2023 Fanji Sihabudin Pranata. All Rights Reserved.</p>
+    </footer>
+
+    <!-- Modal Image Viewer -->
+    <div id="imgModal" class="modal">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="modalImg">
+    </div>
+
+    <script>
+        // 1. SCROLL PROGRESS BAR
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+        };
+
+        // 2. BACKGROUND PARTICLE ANIMATION + PARALLAX
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight * 1.5;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.color = `rgba(56, 189, 248, ${Math.random() * 0.4})`;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < -50 || this.x > width + 50) this.vx *= -1;
+                if (this.y < -50 || this.y > height + 50) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color; ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const particleCount = window.innerWidth < 768 ? 40 : 80;
+            for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        }
+        initParticles();
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            const scrollY = window.scrollY;
+            const parallaxOffset = scrollY * 0.2;
+
+            ctx.save();
+            ctx.translate(0, parallaxOffset);
+
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(56, 189, 248, ${0.08 - distance/1500})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+                    }
+                }
+                particles[i].update(); particles[i].draw();
+            }
+            ctx.restore();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // 3. NAVBAR & MOBILE
+        const navbar = document.getElementById('navbar');
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.querySelector('i').classList.toggle('fa-bars');
+            hamburger.querySelector('i').classList.toggle('fa-times');
+        });
+
+        document.querySelectorAll('.nav-links li').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                hamburger.querySelector('i').classList.add('fa-bars');
+                hamburger.querySelector('i').classList.remove('fa-times');
+            });
+        });
+
+        // 4. SCROLL REVEAL & ACTIVE LINKS
+        const sections = document.querySelectorAll('section');
+        const observerOptions = { threshold: 0.25 };
+        
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+                    const id = entry.target.getAttribute('id');
+                    document.querySelector(`.nav-links a[href="#${id}"]`).classList.add('active');
+                }
+            });
+        }, observerOptions);
+        sections.forEach(section => sectionObserver.observe(section));
+
+        const revealElements = document.querySelectorAll('.reveal-on-scroll, .section-header, .about-content');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // 5. MODAL
+        const modal = document.getElementById("imgModal");
+        const modalImg = document.getElementById("modalImg");
+        const closeModal = document.querySelector(".close-modal");
+        const mainCert = document.getElementById("mainCert");
+
+        mainCert.addEventListener("click", function() {
+            modal.style.display = "block";
+            setTimeout(() => modal.classList.add('show'), 10);
+            modalImg.src = mainCert.querySelector('img').src;
+        });
+
+        closeModal.addEventListener("click", function() {
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = "none", 300);
+        });
+
+        modal.addEventListener("click", function(e) {
+            if (e.target === modal) closeModal.click();
+        });
+    </script>
+</body>
+</html>
